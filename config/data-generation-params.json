@@ -9,6 +9,6 @@
     "date":"20201029",
     "interface": "en0",
     "csvmode":"-e",
-    "path": "network-stats-local/network_stats.py"
+    "path": "network-stats/network_stats.py"
 
 }
