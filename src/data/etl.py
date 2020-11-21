@@ -12,4 +12,5 @@ def etl(source_dir, out_dir):
     
     
     datafiles = glob.glob(os.path.join(source_dir, "*"))
+    print(glob.glob('data/raw/*'))
     print((datafiles))
