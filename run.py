@@ -4,15 +4,17 @@ import sys
 import json
 import os
 
-import src
+sys.path.insert(0, 'src/data')
 
+from etl import etl
+from generate import get_data
 
 def main(targets):
 
     if 'collect' in targets:
         with open('config/data-generation-params.json') as f:
             generation_params = json.load(f)
-            src.data.generate.get_data(generation_params)
+            get_data(generation_params)
         
     if 'data' in targets:
         # Load, clean, and preprocess data. Then store preprocessed data to
@@ -21,7 +23,7 @@ def main(targets):
         with open('config/data-params.json', 'r') as f:
             data_params = json.load(f)
 
-        src.data.etl(**data_params)
+        etl(**data_params)
 
     # if 'features' in targets:
     #     with open('config/features-params.json') as f:
