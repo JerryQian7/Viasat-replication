@@ -1,4 +1,4 @@
 {
-    "source": "data/raw",
-    "outdir": "data/preprocessed"
+    "source_dir": "data/raw",
+    "out_dir": "data/preprocessed"
 }
