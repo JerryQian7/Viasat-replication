@@ -21,7 +21,8 @@ def etl(source_dir, out_dir):
         print('Using Testing Data')
         file_lst = glob.glob(source_dir + '*')
     else:
-        os.system('ln -s /teams/DSC180A_FA20_A00/b05vpnxray/GoodData /data/raw')
+        print(os.getcwd())
+        os.system('ln -s /teams/DSC180A_FA20_A00/b05vpnxray/GoodData ~/viasat-replication/data/raw')
         #Symlinking data from GoodData directory
         print('Symlinking data from GoodData directory') 
         datafiles = glob.glob('data/raw/GoodData/*')
