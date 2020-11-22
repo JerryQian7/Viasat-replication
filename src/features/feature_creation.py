@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 
 def split(filename, chunk_size):
+    """
+    Splits each dataset into chunk_size chunks
+    """
     streaming = int(not 'novideo' in filename)
     df = pd.read_csv(filename)
     start = df['time'].values[0]-1
@@ -15,6 +18,9 @@ def split(filename, chunk_size):
 
 #Streaming longest streak of direction 1 and 2 packets
 def longest_dir_streak(vals, dir):
+    """
+    Finds the longest streak of direction 1 or 2 packets.
+    """
     longest = 0
     current = 0
     for num in vals:
@@ -28,7 +34,10 @@ def longest_dir_streak(vals, dir):
 
 
 def roll(df, column, seconds, stats=['mean']):
-    #window_width = pd.offsets.Second(seconds)
+    """
+    Rolling window aggregates calculated over a specified column, time range, and aggregating stat.
+    """
+    window_width = pd.offsets.Second(seconds)
 
     return (
         df
