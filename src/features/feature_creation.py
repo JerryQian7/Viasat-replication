@@ -5,7 +5,6 @@ def split(filename, chunk_size):
     streaming = int(not 'novideo' in filename)
     df = pd.read_csv(filename)
     start = df['time'].values[0]-1
-    print(start, type(start))
     end = df['time'].values[-1]+chunk_size
     bins = np.arange(start, end, chunk_size)
     df['binned'] = pd.cut(df['time'], bins)

@@ -10,6 +10,10 @@ from feature_creation import longest_dir_streak
 
 def create_features(source_dir, out_dir, out_file, chunk_size):
 
+    #remove files
+    for f in glob.glob(os.path.join(out_dir, '*')):
+        os.remove(f)
+
     preprocessed_dfs = glob.glob(os.path.join(source_dir, 'preprocessed*'))
             
     split_df_groups = [split(f, chunk_size) for f in preprocessed_dfs]
@@ -24,6 +28,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size):
     print(len(merged_keys))
     print(len(merged_dfs))
     for i, df in enumerate(merged_dfs):
+        df = df.sort_values('time')
         streaming = merged_keys[i]
         df = df.dropna(how='any')
         #flow level statistics
@@ -39,7 +44,6 @@ def create_features(source_dir, out_dir, out_file, chunk_size):
         #packet level statistics 
 
         #interpacket delay
-        df = df.sort_values('time')
         df['ip_delay'] = df['time'].diff()
         df = df.dropna(how='any')
         

@@ -11,6 +11,7 @@ from preprocess import packet_data
 def etl(source_dir, out_dir):
     
     if not os.path.exists(source_dir):
+        print('using symlink')
         #need to figure out why python os.symlink didn't work but ln -s worked
         symlink_dir = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
 
@@ -21,6 +22,7 @@ def etl(source_dir, out_dir):
 
     else:
         #test data
+        print('using test data')
         file_lst = glob.glob(source_dir + '*')
 
     #remove files
