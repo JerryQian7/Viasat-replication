@@ -1,0 +1,6 @@
+{
+    "source_dir": "data/preprocessed/",
+    "out_dir": "data/features/",
+    "out_file": "processed_features.csv",
+    "chunk_size" : 90
+}

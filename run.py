@@ -5,37 +5,61 @@ import json
 import os
 
 sys.path.insert(0, 'src/data')
+sys.path.insert(0, 'src/features')
+sys.path.insert(0, 'src/models')
 
 from etl import etl
 from generate import get_data
+from features import create_features
+from train import train_model
 
 def main(targets):
 
-    if 'collect' in targets:
+    if 'generate' in targets:
         with open('config/data-generation-params.json') as f:
             generation_params = json.load(f)
             get_data(generation_params)
+
+    if 'test-data' in targets:
+        with open('config/test-params.json') as f:
+            testdata_params = json.load(f)
+        etl(**testdata_params)
+        print('test data ETL')
         
     if 'data' in targets:
         # Load, clean, and preprocess data. Then store preprocessed data to
         # intermediate directory.
 
-        with open('config/data-params.json', 'r') as f:
-            data_params = json.load(f)
+        with open('config/etl-params.json', 'r') as f:
+            etl_params = json.load(f)
 
-        etl(**data_params)
+        etl(**etl_params)
 
-    # if 'features' in targets:
-    #     with open('config/features-params.json') as f:
-    #         features_params = json.load(f)
+    if 'features' in targets:
+        with open('config/feature-params.json') as f:
+            feature_params = json.load(f)
 
-    #     src.features.apply_features(**features_params)
+        create_features(**feature_params)
 
-    # if 'train' in targets:
-    #     with open('config/train-params.json') as f:
-    #         train_params = json.load(f)
+    if 'test' in targets:
+        with open('config/test-params.json') as f:
+            testdata_params = json.load(f)
 
-    #     src.models.train(**train_params)
+        with open('config/feature-params.json') as f:
+            feature_params = json.load(f)
+
+        with open('config/model-params.json') as f:
+            model_params = json.load(f)
+
+        etl(**testdata_params)
+        create_features(**feature_params)
+        train_model(**model_params)
+         
+    if 'train' in targets:
+        with open('config/model-params.json') as f:
+            model_params = json.load(f)
+
+        train_model(**model_params)
 
         
         
