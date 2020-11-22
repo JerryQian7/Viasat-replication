@@ -16,13 +16,11 @@ def etl(source_dir, out_dir):
         symlink_dir = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
 
         os.symlink(symlink_dir, source_dir)    
-        #do a os command to run ln -s   
-        datafiles = glob.glob('data/raw/GoodData/*')
-        file_lst = [l for l in datafiles if 'novpn' not in l]
+    #do a os command to run ln -s   
+    datafiles = glob.glob('data/raw/GoodData/*')
+    file_lst = [l for l in datafiles if 'novpn' not in l]
 
-    else:
-        #test data
-        print('using test data')
+    if 'test' in source_dir:
         file_lst = glob.glob(source_dir + '*')
 
     #remove files
