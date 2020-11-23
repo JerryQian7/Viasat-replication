@@ -8,12 +8,37 @@ We use the `network-stats` tool from Viasat, which will output packet data on a 
 
 Log on to DSMLP via `ssh <username>@dsmlp-login.ucsd.edu`
 
+Launch a Docker container with the necessary components via `launch-180.sh -i jeq004/viasat-replication -G B05_VPN_XRAY`
+
 Clone this repository: `git clone https://github.com/JerryQian7/viasat-replication.git`
 
-Now, you are ready to configure targets for our project build, via `python main.py <target(s)>`
+Navigate to this repository `cd viasat-replication`
+
+Now, you are ready to configure targets for our project build, via `python main.py <target(s)>`. Details are specified below.
 
 ## Targets
 
 ### generate
+Generates data from the `network-stats` tool by capturing your network interface activity. Settings such as the network interface, output type, and file naming convention can be configured in `config/data-generation-params`.
+
+`Ctrl-C` to stop data generation.
+
+### data
+This target will prepare the data by loading it from a source directory, cleaning and filtering the data, and saving the preprocessed the data to an output directory.
+
+You can configure the source and output directories in 'config/etl-params'. By default, and when not using test data, the source directory will be `data/raw` and the output directory will be `data/preprocessed`.
+
+### features
+Engineers features on the preprocessed data and saves to an output directory, which can be configured in `config/feature-params`. Other feature parameters such as chunk size and rolling window lengths can also be configured. 
+
+
+### train
+Trains a classifier based on the new features and outputs the accuracy between the predicted and true labels. In other words, it prints out the percentage of cases that were correctly classified as streaming.
+
+
+
+
+
+
 
 
