@@ -39,8 +39,6 @@ def etl(source_dir, out_dir):
         df = df.sort_values('time')
         df['dt_time'] = pd.to_timedelta(df.time - df.time[0], 'ms')
         df = df.set_index('dt_time')
-        #print(df)
-
 
 
         filename = os.path.basename(filename)

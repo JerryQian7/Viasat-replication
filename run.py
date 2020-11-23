@@ -17,7 +17,7 @@ def main(targets):
 
     with open('config/data-generation-params.json') as f:
         generation_params = json.load(f)
-    with open('config/test-params.json') as f:
+    with open('config/test-etl-params.json') as f:
         testdata_params = json.load(f)
     with open('config/etl-params.json') as f:
         etl_params = json.load(f)
