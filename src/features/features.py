@@ -100,6 +100,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         features_df.iloc[i] = features
 
     features_df.dropna().to_csv(os.path.join(out_dir, out_file))
+    print('Features created: ', list(features_df.columns))
 
     
 

@@ -36,6 +36,7 @@ def main(targets):
         
         etl(**testdata_params)
         print('Test Data ETL Finished.')
+        print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
         
     if 'data' in targets:
         # Load, clean, and preprocess data. Then store preprocessed data to intermediate directory.
@@ -49,8 +50,10 @@ def main(targets):
     if 'test' in targets:
         etl(**testdata_params)
         print('Test Data ETL Finished.')
+        print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
         create_features(**test_feature_params)
         print("Feature engineering finished.")
+        print('Outputting feature engineered data to %s' % test_feature_params['out_dir'])
         train_model(**model_params)
         print("Model training finished.")
          
