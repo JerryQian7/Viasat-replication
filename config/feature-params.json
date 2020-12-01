@@ -4,5 +4,7 @@
     "out_file": "processed_features.csv",
     "chunk_size" : 60000,
     "rolling_window_1": 10,
-    "rolling_window_2": 60
+    "rolling_window_2": 60,
+    "resample_rate": "100ms",
+    "frequency": 10
 }

@@ -2,13 +2,18 @@ import pandas as pd
 import glob
 import os
 import itertools
+import numpy as np
+import scipy
+from scipy.signal import peak_prominences
+import warnings
+warnings.filterwarnings("ignore")
 
 from feature_creation import split
 from feature_creation import roll
 from feature_creation import longest_dir_streak
 
 
-def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1, rolling_window_2):
+def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1, rolling_window_2, resample_rate, frequency):
 
     #remove files
     for f in glob.glob(os.path.join(out_dir, '*')):
@@ -23,7 +28,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     #Split dataframes
     merged_dfs = [m[1] for m in merged]
     cols = ['b_ratio', 'p_ratio', 'delays_10', 'delays_60', 'psize_10', 'psize_60', 'sent_l_ratio', 'sent_s_ratio',
-       'rec_l_ratio', 'rec_s_ratio', 'longest_sent', 'longest_rec', 'streaming']
+       'rec_l_ratio', 'rec_s_ratio', 'longest_sent', 'longest_rec', 'max_prom', 'streaming']
 
     features_df = pd.DataFrame(columns=cols, index=range(len(merged)))
 
@@ -49,6 +54,16 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         #interpacket delay
         df['ip_delay'] = df.index.to_series().diff().dt.total_seconds() * 1000
         df = df.dropna(how='any')
+
+        #signal peak prominence
+        df_rs = df.resample(resample_rate).sum()
+        f, Pxx_den = scipy.signal.welch(df_rs['size'], fs = frequency)
+        peaks, _ = scipy.signal.find_peaks(np.sqrt(Pxx_den))
+        prominences = peak_prominences(np.sqrt(Pxx_den), peaks)[0]
+        try:
+            df_max_prom = prominences.max()
+        except:
+            df_max_prom = 0
         
         #interpacket delay means over rolling windows of 10 and 60
         rolling_delays_10 = roll(df, 'ip_delay', rolling_window_1)['mean'].mean()
@@ -93,7 +108,8 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
                     received_large_ratio, 
                     received_small_ratio,
                     longest_sent, 
-                    longest_received, 
+                    longest_received,
+                    df_max_prom, 
                     #downtime_sent_time, downtime_received_time
                     streaming
                 ]

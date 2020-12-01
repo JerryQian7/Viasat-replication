@@ -1,6 +1,8 @@
 import sys
 import os
 
+#python3.8 network_stats.py -i en0 -s -e jeq004-novideo-vpn-20201128.csv
+
 def get_data(params):
     """
     Captures data from network_stats
