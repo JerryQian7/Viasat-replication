@@ -54,17 +54,40 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         received_bytes = df[df['dir'] == 2]['size'].sum()
         sent_packets = len(df[df['dir'] == 1])
         received_packets = len(df[df['dir'] == 2])
+
+        #if there are no received bytes or packets, skip this chunk
         if received_bytes == 0 or received_packets == 0:
             continue
-        bytes_ratio = sent_bytes / received_bytes
-        packet_ratio = sent_packets / received_packets
-        #packet level statistics 
 
+        #ratio of sent bytes over received bytes
+        bytes_ratio = sent_bytes / received_bytes
+
+        #ratio of sent packets over received packets
+        packet_ratio = sent_packets / received_packets
+
+        #ratios
+        #large packet is defined as any packet size over 1200 byes
+        #small packet is defined as any packet under 200 bytes
+        sent_large = df[(df['dir']==1) & (df['size'] > 1200)]
+        sent_small = df[(df['dir']==1) & (df['size'] < 200)]
+        received_large = df[(df['dir']==2) & (df['size'] > 1200)]
+        received_small = df[(df['dir']==2) & (df['size'] < 200)]
+        
+        #ratio of large, uploaded packets over all uploaded packets 
+        sent_large_ratio = len(sent_large) / len(df[(df['dir']==1)])
+        #ratio of small, uploaded packets over all uploaded packets
+        sent_small_ratio = len(sent_small) / len(df[(df['dir']==1)])
+        #ratio of large, downloaded packets over all downloaded packets
+        received_large_ratio = len(received_large) / len(df[(df['dir']==2)])
+        #ratio of small, downloaded packets over all downloaded packets
+        received_small_ratio = len(received_small) / len(df[(df['dir']==2)])
+        
+        
         #interpacket delay
         df['ip_delay'] = df.index.to_series().diff().dt.total_seconds() * 1000
         df = df.dropna(how='any')
 
-        #signal peak prominence
+        #signal peak prominence using welch's method
         df_rs = df.resample(resample_rate).sum()
         f, Pxx_den = scipy.signal.welch(df_rs['size'], fs = frequency)
         peaks, _ = scipy.signal.find_peaks(np.sqrt(Pxx_den))
@@ -73,7 +96,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
             df_max_prom = prominences.max()
         except:
             df_max_prom = 0
-        
+        print(df_max_prom)
         #interpacket delay means over rolling windows of 10 seconds and 60 seconds
         rolling_delays_10 = roll(df, 'ip_delay', rolling_window_1)['mean'].mean()
         rolling_delays_60 = roll(df, 'ip_delay', rolling_window_2)['mean'].mean()
@@ -82,21 +105,6 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         #packet size means over rolling windows of 10 seconds and 60 seconds
         packet_size_means_10 = roll(df, 'size', rolling_window_1)['mean'].mean()
         packet_size_means_60 = roll(df, 'size', rolling_window_2)['mean'].mean()
-        
-        #ratios
-        sent_large = df[(df['dir']==1) & (df['size'] > 1200)]
-        sent_small = df[(df['dir']==1) & (df['size'] < 200)]
-        received_large = df[(df['dir']==2) & (df['size'] > 1200)]
-        received_small = df[(df['dir']==2) & (df['size'] < 200)]
-        
-        try:
-            sent_large_ratio = len(sent_large) / len(df[(df['dir']==1)])
-            sent_small_ratio = len(sent_small) / len(df[(df['dir']==1)])
-            received_large_ratio = len(received_large) / len(df[(df['dir']==2)])
-            received_small_ratio = len(received_small) / len(df[(df['dir']==2)])
-        except:
-            print('failed at ratios')
-            continue
         
         #longest streaks
         longest_sent = longest_dir_streak(df['dir'], 1)

@@ -5,6 +5,6 @@
     "chunk_size" : 60000, 
     "rolling_window_1": 10,
     "rolling_window_2": 60,
-    "resample_rate": "100ms",
-    "frequency": 10
+    "resample_rate": "500ms",
+    "frequency": 2
 }
