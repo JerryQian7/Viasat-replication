@@ -96,15 +96,16 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
             df_max_prom = prominences.max()
         except:
             df_max_prom = 0
-        print(df_max_prom)
-        #interpacket delay means over rolling windows of 10 seconds and 60 seconds
-        rolling_delays_10 = roll(df, 'ip_delay', rolling_window_1)['mean'].mean()
-        rolling_delays_60 = roll(df, 'ip_delay', rolling_window_2)['mean'].mean()
         
-        #print(roll(df, 'ip_delay', rolling_window_1))
+        #interpacket delay means over rolling windows of 10 seconds and 60 seconds
+
+        #need to convert milliseconds to seconds here
+        rolling_delays_10 = roll(df, 'ip_delay', int(rolling_window_1/1000))['mean'].mean()
+        rolling_delays_60 = roll(df, 'ip_delay', int(rolling_window_2/1000))['mean'].mean()
+        
         #packet size means over rolling windows of 10 seconds and 60 seconds
-        packet_size_means_10 = roll(df, 'size', rolling_window_1)['mean'].mean()
-        packet_size_means_60 = roll(df, 'size', rolling_window_2)['mean'].mean()
+        packet_size_means_10 = roll(df, 'size', int(rolling_window_1/1000))['mean'].mean()
+        packet_size_means_60 = roll(df, 'size', int(rolling_window_2/1000))['mean'].mean()
         
         #longest streaks
         longest_sent = longest_dir_streak(df['dir'], 1)
