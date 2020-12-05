@@ -19,13 +19,18 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     for f in glob.glob(os.path.join(out_dir, '*')):
         os.remove(f)
 
+    #splitting dataframe into chunk_size'd chunks
+    #chunk size is in milliseconds
     preprocessed_dfs = glob.glob(os.path.join(source_dir, 'preprocessed*'))
     split_df_groups = [split(f, chunk_size) for f in preprocessed_dfs]
+    
     #flattening list
     merged = list(itertools.chain.from_iterable(split_df_groups))
+    
     #0s and 1s indicating whether or not streaming is occurring
     merged_keys = [m[0] for m in merged]
-    #Split dataframes
+    
+    #the actual dataframes
     merged_dfs = [m[1] for m in merged]
     cols = ['b_ratio', 'p_ratio', 'delays_10', 'delays_60', 'psize_10', 'psize_60', 'sent_l_ratio', 'sent_s_ratio',
        'rec_l_ratio', 'rec_s_ratio', 'longest_sent', 'longest_rec', 'max_prom', 'streaming']
@@ -37,7 +42,11 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         df = df.set_index('dt_time')
         df = df.drop(columns=['binned'])
         df = df.sort_values('time')
+
+        #1 if streaming is ocurring, 0 if not
         streaming = merged_keys[i]
+
+        #drop rows with any nan
         df = df.dropna(how='any')
 
         #flow level statistics
@@ -65,12 +74,12 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
         except:
             df_max_prom = 0
         
-        #interpacket delay means over rolling windows of 10 and 60
+        #interpacket delay means over rolling windows of 10 seconds and 60 seconds
         rolling_delays_10 = roll(df, 'ip_delay', rolling_window_1)['mean'].mean()
         rolling_delays_60 = roll(df, 'ip_delay', rolling_window_2)['mean'].mean()
         
         #print(roll(df, 'ip_delay', rolling_window_1))
-        #packet size means over rolling windows of 10 and 60
+        #packet size means over rolling windows of 10 seconds and 60 seconds
         packet_size_means_10 = roll(df, 'size', rolling_window_1)['mean'].mean()
         packet_size_means_60 = roll(df, 'size', rolling_window_2)['mean'].mean()
         

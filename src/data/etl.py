@@ -32,11 +32,18 @@ def etl(source_dir, out_dir):
         os.remove(f)
 
     for filename in file_lst:
+        #reading in each dataframe
         df = pd.read_csv(filename)
+        
+        #filtering any non vpn connection rows
         df = isolate_vpn(df)
+
+        #splitting data into packet level data
         df = df.apply(packet_data, axis=1)
         df = pd.DataFrame(df.sum(), columns = ['time','size','dir']).astype(int)
         df = df.sort_values('time')
+
+        #setting index as timedelta in milliseconds
         df['dt_time'] = pd.to_timedelta(df.time - df.time[0], 'ms')
         df = df.set_index('dt_time')
 
