@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import os
+import pathlib
 import itertools
 
 from preprocess import isolate_vpn
@@ -8,32 +9,43 @@ from preprocess import unpack
 from preprocess import packet_data
 
 
+DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
+
 def etl(source_dir, out_dir):
+
+    source_path = pathlib.Path(source_dir)
+    out_path = pathlib.Path(out_dir)
     
-    if not os.path.exists(source_dir):
-        print('Using symlink')
-        #need to figure out why python os.symlink didn't work but ln -s worked
-        symlink_dir = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
+    # Ensure source exists. If not then we'll create it with symlinking.
+    if not source_path.exists():
 
-        os.symlink(symlink_dir, source_dir)  
+        # Create the parents. It's important we don't make the final directory
+        # otherwise the symlink will fail since it already exists!
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Symlink data to make our source directory
+        print(f"Symlinking {source_path} to raw data from {DATA_DIRECTORY}")
+        source_path.symlink_to(
+            pathlib.Path(DATA_DIRECTORY), target_is_directory=True
+        )
+
+    # Ensure out directory exists.
+    out_path.mkdir(parents=True, exist_ok=True)
         
-    if 'test' in source_dir:
-        print('Using Testing Data.')
-        file_lst = glob.glob(source_dir + '*')
-    else:
-        #os.system('ln -s /teams/DSC180A_FA20_A00/b05vpnxray/GoodData ~/viasat-replication/data/raw')
-        #Symlinking data from GoodData directory
-        print('Symlinking data from GoodData directory') 
-        datafiles = glob.glob('data/raw/GoodData/*')
-        file_lst = [l for l in datafiles if 'novpn' not in l]
+    # Clean out existing preprocessed files.
+    for fp in out_path.iterdir():
+        fp.unlink()
+    
+    # We're only working with data which used a VPN, so we can ignore the rest.
+    file_lst = [
+        fp
+        for fp in source_path.iterdir()
+        if 'novpn' not in fp.name
+    ]
 
-    #remove files
-    for f in glob.glob(os.path.join(out_dir, '*')):
-        os.remove(f)
-
-    for filename in file_lst:
+    for filepath in file_lst:
         #reading in each dataframe
-        df = pd.read_csv(filename)
+        df = pd.read_csv(filepath)
         
         #filtering any non vpn connection rows
         df = isolate_vpn(df)
@@ -47,6 +59,4 @@ def etl(source_dir, out_dir):
         df['dt_time'] = pd.to_timedelta(df.time - df.time[0], 'ms')
         df = df.set_index('dt_time')
 
-
-        filename = os.path.basename(filename)
-        df.to_csv(os.path.join(out_dir, 'preprocessed-'+filename))
+        df.to_csv(os.path.join(out_dir, 'preprocessed-'+filepath.name))
