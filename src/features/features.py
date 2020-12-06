@@ -15,6 +15,9 @@ from feature_creation import longest_dir_streak
 
 def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1, rolling_window_2, resample_rate, frequency):
 
+    # Ensure that the output directory exists.
+    os.makedirs(out_dir, exist_ok=True)
+
     #remove files
     for f in glob.glob(os.path.join(out_dir, '*')):
         os.remove(f)
