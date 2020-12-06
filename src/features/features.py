@@ -25,16 +25,13 @@ def engineer_file(
 
     df['dt_time'] = pd.to_timedelta(df['dt_time'])
     df = df.set_index('dt_time')
-    # Not sure what column this is referring to.
-    # df = df.drop(columns=['binned'])
+    df = df.drop(columns=['binned'])
 
     # Already been sorted in preprocessing.
     # df = df.sort_values('time')
 
-    # How would there be any nans? Regardless, this should be handled during
-    # preprocessing.
-    # #drop rows with any nan
-    # df = df.dropna(how='any')
+    #drop rows with any nan
+    df = df.dropna(how='any')
 
     #flow level statistics
     sent_bytes = df[df['dir'] == 1]['size'].sum()

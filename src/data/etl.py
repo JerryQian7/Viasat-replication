@@ -10,6 +10,7 @@ import multiprocessing
 import time
 
 DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
+DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/data/unzipped"
 # network-stats records per-packet timing in milliseconds,
 PACKET_TIMESTAMP_UNIT = 'ms'
 
@@ -82,7 +83,11 @@ def _process_file(args):
     """
     Helper to pass multiple arguments during a multiprocessing map.
     """
-    return process_file(*args)
+    try:
+        return process_file(*args)
+    except Exception as e:
+        print(args)
+        raise e
 
 def process_file(filepath, out_dir):
     """
