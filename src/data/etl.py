@@ -89,7 +89,7 @@ def process_file(filepath, out_dir):
     Filters out irrelevant traffic, then extracts packet-level data.
     """
     
-    print(f'Processing {filepath}')
+    # print(f'Processing {filepath}')
 
     df = pd.read_csv(filepath)
     
@@ -150,7 +150,7 @@ def etl(source_dir, out_dir):
     ]
 
     # We'll use a multiprocessing pool to parallelize our preprocessing since
-    # it involves lots of IO.
+    # it involves computation.
     args = [
         (filepath, out_path)
         for filepath in to_process
