@@ -15,11 +15,11 @@ from feature_creation import longest_dir_streak
 import multiprocessing
 import time
 
-def _engineer_file(args):
-    return engineer_file(*args)
+def _engineer_features(args):
+    return engineer_features(*args)
     
-def engineer_file(
-    df, label, chunk_size, rolling_window_1, rolling_window_2, resample_rate,
+def engineer_features(
+    df, label, rolling_window_1, rolling_window_2, resample_rate,
     frequency
     ):
 
@@ -41,7 +41,7 @@ def engineer_file(
 
     #if there are no received bytes or packets, skip this chunk
     if received_bytes == 0 or received_packets == 0:
-        pass
+        return
 
     #ratio of sent bytes over received bytes
     bytes_ratio = sent_bytes / received_bytes
@@ -149,7 +149,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     # for i, df in enumerate(merged_dfs):
 
     args = [
-        (merged_dfs[i], merged_keys[i], chunk_size, rolling_window_1,
+        (merged_dfs[i], merged_keys[i], rolling_window_1,
         rolling_window_2, resample_rate, frequency)
         for i in range(len(merged_dfs))
     ]
@@ -158,10 +158,10 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     print(f'Starting a processing pool of {workers} workers.')
     start = time.time()
     pool = multiprocessing.Pool(processes=workers)
-    features = pool.map(_engineer_file, args)
+    features = pool.map(_engineer_features, args)
     print(f'Time elapsed: {round(time.time() - start)} seconds.')
     
-    features = np.vstack(features)
+    features = np.vstack(filter(lambda x: x is not None, features))
     print(f'{len(features)} chunks of data feature engineered.')
 
     features_df = pd.DataFrame(features, columns=cols)
