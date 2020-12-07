@@ -4,14 +4,10 @@ import sys
 import json
 import os
 
-sys.path.insert(0, 'src/data')
-sys.path.insert(0, 'src/features')
-sys.path.insert(0, 'src/models')
-
-from etl import etl
-from generate import get_data
-from features import create_features
-from train import train_model
+from src.data import preprocess_data
+from src.data import get_data
+from src.features import create_features
+from src.models import train_model
 
 def main(targets):
 
@@ -35,13 +31,13 @@ def main(targets):
 
     if 'test-data' in targets:
         # Load, clean and preprocess test data. Then store preprocessed data to data/preprocessed
-        etl(**testdata_params)
+        preprocess_data(**testdata_params)
         print('Test Data ETL Finished.')
         print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
         
     if 'data' in targets:
         # Load, clean, and preprocess data. Then store preprocessed data to data/preprocessed
-        etl(**etl_params)
+        preprocess_data(**etl_params)
         print('Data ETL Finished.')
 
     if 'features' in targets:
@@ -51,7 +47,7 @@ def main(targets):
 
     if 'test' in targets:
         # Runs all targets on test data
-        etl(**testdata_params)
+        preprocess_data(**testdata_params)
         print('Test Data ETL Finished.')
         print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
         create_features(**test_feature_params)
