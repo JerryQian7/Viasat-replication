@@ -11,7 +11,7 @@ def split(filename, chunk_size):
     # On uncleaned filenames:
     streaming_providers = [
         "youtube", "hbomax", "disneyplus", "canvas", "amazonprime", "hulu",
-        "vimeo", "netflix", "espnplus",
+        "vimeo", "netflix", "espnplus", "video"
     ]
     browsing_words = [
         "novideo", "nostream", "general", "browsing", 
@@ -21,7 +21,7 @@ def split(filename, chunk_size):
 
     # A file can't be both streaming and browsing, and it can't be neither!
     if (is_streaming and is_browsing) or not (is_streaming or is_browsing):
-        raise Exception(f'Filname {filname} unclear.')
+        raise Exception(f'Filname {filename} unclear.')
 
 
     df = pd.read_csv(filename)
