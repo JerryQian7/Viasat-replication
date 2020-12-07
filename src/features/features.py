@@ -8,9 +8,9 @@ from scipy.signal import peak_prominences
 import warnings
 warnings.filterwarnings("ignore")
 
-from feature_creation import split
-from feature_creation import roll
-from feature_creation import longest_dir_streak
+from src.features.feature_creation import split
+from src.features.feature_creation import roll
+from src.features.feature_creation import longest_dir_streak
 
 import multiprocessing
 import time
@@ -117,7 +117,6 @@ def engineer_features(
             ]
 
     return features
-    # features_df.iloc[i] = features
 
 def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1, rolling_window_2, resample_rate, frequency):
 
@@ -146,8 +145,6 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
 
     features_df = pd.DataFrame(columns=cols, index=range(len(merged)))
 
-    # for i, df in enumerate(merged_dfs):
-
     args = [
         (merged_dfs[i], merged_keys[i], rolling_window_1,
         rolling_window_2, resample_rate, frequency)
@@ -158,10 +155,10 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     print(f'Starting a processing pool of {workers} workers.')
     start = time.time()
     pool = multiprocessing.Pool(processes=workers)
-    features = pool.map(_engineer_features, args)
+    results = pool.map(_engineer_features, args)
     print(f'Time elapsed: {round(time.time() - start)} seconds.')
     
-    features = np.vstack(filter(lambda x: x is not None, features))
+    features = np.vstack(filter(lambda x: x is not None, results))
     print(f'{len(features)} chunks of data feature engineered.')
 
     features_df = pd.DataFrame(features, columns=cols)

@@ -116,7 +116,7 @@ def process_file(filepath, out_dir):
     return True
 
 
-def etl(source_dir, out_dir):
+def preprocess_data(source_dir, out_dir):
     """
     Loads data from source, then performs cleaning and preprocessing steps. Each
     preprocessed file is saved to the out directory.
