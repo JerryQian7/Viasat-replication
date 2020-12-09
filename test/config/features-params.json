@@ -1,6 +1,6 @@
 {
-    "source_dir": "data/preprocessed/",
-    "out_dir": "data/features/",
+    "source_dir": "data/test/preprocessed/",
+    "out_dir": "data/test/features/",
     "out_file": "processed_features.csv",
     "chunk_size" : 60000,
     "rolling_window_1": 5000,

@@ -3,67 +3,86 @@
 import sys
 import json
 import os
+import pathlib
+from pathlib import Path
 
 from src.data import preprocess_data
-from src.data import get_data
+from src.data import collect_data
 from src.features import create_features
 from src.models import train_model
 
 def main(targets):
 
-    with open('config/data-generation-params.json') as f:
-        generation_params = json.load(f)
-    with open('config/test-etl-params.json') as f:
-        testdata_params = json.load(f)
-    with open('config/etl-params.json') as f:
-        etl_params = json.load(f)
-    with open('config/feature-params.json') as f:
-        feature_params = json.load(f)
-    with open('config/model-params.json') as f:
-        model_params = json.load(f)
-    with open('config/test-feature-params.json') as f:
-        test_feature_params = json.load(f)
+    # Will change to test config path if test target is seen
+    config_dir = 'config'
+    run_all = False
+
+    if 'test' in targets:
+        # If `test` is the only target seen, then run all targets with the 
+        # configs and data found in the test directory.
+        #
+        # Otherwise, if additional targets are specified then only run those
+        # targets but still use test config (and therefore test data).
+        print('Test target recognized. Will use test configuration files.')
+        config_dir = 'test/config'
+
+        if len(targets) == 1:
+            print('Testing all targets: `data`, `features`, `train`.')
+            run_all = True
+
+    if 'all' in targets:
+        run_all = True
+    
+    if 'data' in targets or run_all:
+        # Load, clean, and preprocess data. Then store preprocessed data to
+        # configured intermediate directory.
+        print('Data target recognized.')
+
+        with open(Path(config_dir, 'data-params.json'), 'r') as f:
+            data_params = json.load(f)
+
+        print('Running ETL pipeline.')
+        preprocess_data(**data_params)
+        print('ETL pipeline complete.')
+
+    if 'features' in targets or run_all:
+        # Creates features for preprocessed data and stores feature-engineered
+        # data to a configured csv and directory.
+        print('Features target recognized.')
+
+        with open(Path(config_dir, 'features-params.json'), 'r') as f:
+            features_params = json.load(f)
+
+        print('Engineering features.')
+        create_features(**features_params)
+        print('Feature engineering complete.')
+         
+    if 'train' in targets or run_all:
+        # Trains model based on feature-engineeered data, report some of its
+        # scores, and save the model.
+        print('Train target recognized.')
+
+        with open(Path(config_dir, 'train-params.json'), 'r') as f:
+            train_params = json.load(f)
+
+        print('Training model.')
+        train_model(**train_params)
+        print('Model training complete.')
 
     if 'generate' in targets:
         # Generates data from network-stats
-        get_data(generation_params)
-        print('Data generated from network-stats.')
+        #
+        # NOTE: This target should *not* be included in `all`.
+        print('Generate target recognized.')
 
-    if 'test-data' in targets:
-        # Load, clean and preprocess test data. Then store preprocessed data to data/preprocessed
-        preprocess_data(**testdata_params)
-        print('Test Data ETL Finished.')
-        print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
-        
-    if 'data' in targets:
-        # Load, clean, and preprocess data. Then store preprocessed data to data/preprocessed
-        preprocess_data(**etl_params)
-        print('Data ETL Finished.')
+        with open(Path(config_dir, 'generate-params.json'), 'r') as f:
+            generate_params = json.load(f)
 
-    if 'features' in targets:
-        # Creates features for preprocessed data and stores feature-engineered data to data/features
-        create_features(**feature_params)
-        print("Feature engineering finished.")
-
-    if 'test' in targets:
-        # Runs all targets on test data
-        preprocess_data(**testdata_params)
-        print('Test Data ETL Finished.')
-        print('Outputting preprocessed data to %s' % testdata_params['out_dir'])
-        create_features(**test_feature_params)
-        print("Feature engineering finished.")
-        print('Outputting feature engineered data to %s' % test_feature_params['out_dir'])
-        train_model(**model_params)
-        print("Model training finished.")
-         
-    if 'train' in targets:
-        # Trains model based on feature-engineeered data
-        train_model(**model_params)
-        print("Model training finished.")
+        print('Collecting data with network-stats.')
+        get_data(generate_params)
+        print('Data collection complete.')
 
     return
-
-
 
 if __name__ == "__main__":
     targets = sys.argv[1:]
