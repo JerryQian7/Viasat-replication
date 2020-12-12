@@ -27,9 +27,6 @@ def engineer_features(
     df = df.set_index('dt_time')
     df = df.drop(columns=['binned'])
 
-    # Already been sorted in preprocessing.
-    # df = df.sort_values('time')
-
     #drop rows with any nan
     df = df.dropna(how='any')
 
@@ -43,11 +40,14 @@ def engineer_features(
     if received_bytes == 0 or received_packets == 0:
         return
 
+    received_mean_size = df.loc[df.dir==2, 'size'].mean()
+    sent_mean_size = df.loc[df.dir==1, 'size'].mean()
+
     #ratio of sent bytes over received bytes
     bytes_ratio = sent_bytes / received_bytes
 
     #ratio of sent packets over received packets
-    packet_ratio = sent_packets / received_packets
+    count_ratio = sent_packets / received_packets
 
     #ratios
     #large packet is defined as any packet size over 1200 byes
@@ -58,13 +58,13 @@ def engineer_features(
     received_small = df[(df['dir']==2) & (df['size'] < 200)]
     
     #ratio of large, uploaded packets over all uploaded packets 
-    sent_large_ratio = len(sent_large) / len(df[(df['dir']==1)])
+    sent_large_prop = len(sent_large) / len(df[(df['dir']==1)])
     #ratio of small, uploaded packets over all uploaded packets
-    sent_small_ratio = len(sent_small) / len(df[(df['dir']==1)])
+    sent_small_prop = len(sent_small) / len(df[(df['dir']==1)])
     #ratio of large, downloaded packets over all downloaded packets
-    received_large_ratio = len(received_large) / len(df[(df['dir']==2)])
+    received_large_prop = len(received_large) / len(df[(df['dir']==2)])
     #ratio of small, downloaded packets over all downloaded packets
-    received_small_ratio = len(received_small) / len(df[(df['dir']==2)])
+    received_small_prop = len(received_small) / len(df[(df['dir']==2)])
     
     
     #interpacket delay
@@ -82,37 +82,29 @@ def engineer_features(
         df_max_prom = 0
     
     #interpacket delay means over rolling windows of 10 seconds and 60 seconds
-
+    #
     #need to convert milliseconds to seconds here
     rolling_delays_10 = roll(df, 'ip_delay', int(rolling_window_1/1000))['mean'].mean()
     rolling_delays_60 = roll(df, 'ip_delay', int(rolling_window_2/1000))['mean'].mean()
     
-    #packet size means over rolling windows of 10 seconds and 60 seconds
-    packet_size_means_10 = roll(df, 'size', int(rolling_window_1/1000))['mean'].mean()
-    packet_size_means_60 = roll(df, 'size', int(rolling_window_2/1000))['mean'].mean()
-    
     #longest streaks
-    longest_sent = longest_dir_streak(df['dir'], 1)
-    longest_received = longest_dir_streak(df['dir'], 2)
+    streak_sent = longest_dir_streak(df['dir'], 1)
+    streak_received = longest_dir_streak(df['dir'], 2)
     
-    #downtime, longest time of no byte above 1200 bytes
-    #downtime_sent_time = pd.Series(sent_large.index).dropna(how='any').diff().max().total_seconds()
-    #downtime_received_time = pd.Series(received_large.index).dropna(how='any').diff().max().total_seconds()
-        
-    features = [bytes_ratio, 
-                packet_ratio, 
-                rolling_delays_10, 
-                rolling_delays_60, 
-                packet_size_means_10,
-                packet_size_means_60, 
-                sent_large_ratio, 
-                sent_small_ratio, 
-                received_large_ratio, 
-                received_small_ratio,
-                longest_sent, 
-                longest_received,
-                df_max_prom, 
-                #downtime_sent_time, downtime_received_time
+    features = [bytes_ratio,
+                count_ratio,
+                rolling_delays_10,
+                rolling_delays_60,
+                received_mean_size,
+                sent_mean_size,
+                sent_large_prop,
+                sent_small_prop,
+                received_large_prop,
+                received_small_prop,
+                streak_sent,
+                streak_received,
+                df_max_prom,
+                
                 label
             ]
 
@@ -122,10 +114,6 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
 
     # Ensure that the output directory exists.
     os.makedirs(out_dir, exist_ok=True)
-
-    #remove files
-    for f in glob.glob(os.path.join(out_dir, '*')):
-        os.remove(f)
 
     #splitting dataframe into chunk_size'd chunks
     #chunk size is in milliseconds
@@ -140,10 +128,24 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     
     #the actual dataframes
     merged_dfs = [m[1] for m in merged]
-    cols = ['b_ratio', 'p_ratio', 'delays_10', 'delays_60', 'psize_10', 'psize_60', 'sent_l_ratio', 'sent_s_ratio',
-       'rec_l_ratio', 'rec_s_ratio', 'longest_sent', 'longest_rec', 'max_prom', 'streaming']
+    cols = [
+        'bytes_sr_ratio',
+        'count_sr_ratio',
+        'smoothed_mean_delay_10s',
+        'smoothed_mean_delay_60s',
+        'received_mean_size',
+        'sent_mean_size',
+        'sent_large_prop',
+        'sent_small_prop',
+        'received_large_prop',
+        'received_small_prop',
+        'sent_longest_streak',
+        'received_longest_streak',
+        'max_frequency_prominence',
 
-    features_df = pd.DataFrame(columns=cols, index=range(len(merged)))
+        'streaming'
+    ]
+
 
     args = [
         (merged_dfs[i], merged_keys[i], rolling_window_1,
@@ -159,14 +161,9 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     print(f'Time elapsed: {round(time.time() - start)} seconds.')
     
     features = np.vstack(filter(lambda x: x is not None, results))
-    print(f'{len(features)} chunks of data feature engineered.')
 
-    features_df = pd.DataFrame(features, columns=cols)
+    features_df = pd.DataFrame(features, columns=cols).dropna()
+    print(f'{features_df.shape[0]} chunks of data feature engineered.')
 
-    features_df.dropna().to_csv(os.path.join(out_dir, out_file), index=False)
+    features_df.to_csv(os.path.join(out_dir, out_file), index=False)
     print('Features created: ', list(features_df.columns))
-
-
-      
-    
-

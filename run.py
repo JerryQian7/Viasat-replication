@@ -6,8 +6,9 @@ import os
 import pathlib
 from pathlib import Path
 
-from src.data import preprocess_data
+import src
 from src.data import collect_data
+from src.data import preprocess_data
 from src.features import create_features
 from src.models import train_model
 
@@ -17,6 +18,14 @@ def main(targets):
     config_dir = 'config'
     run_all = False
 
+    if 'all' in targets or len(targets) == 0:
+        run_all = True
+
+    if 'clean' in targets:
+        # Would probably just delete the data folder... but should truly look at
+        # the configuration to decide what to delete.
+        raise NotImplementedError
+    
     if 'test' in targets:
         # If `test` is the only target seen, then run all targets with the 
         # configs and data found in the test directory.
@@ -29,9 +38,6 @@ def main(targets):
         if len(targets) == 1:
             print('Testing all targets: `data`, `features`, `train`.')
             run_all = True
-
-    if 'all' in targets:
-        run_all = True
     
     if 'data' in targets or run_all:
         # Load, clean, and preprocess data. Then store preprocessed data to

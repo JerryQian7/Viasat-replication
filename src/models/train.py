@@ -38,3 +38,5 @@ def train_model(source_dir, classifier, model_params):
     y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     print('%s model accuracy: %s' % (classifier, accuracy))
+
+    return clf

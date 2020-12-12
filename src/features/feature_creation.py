@@ -6,7 +6,6 @@ def split(filename, chunk_size):
     """
     Splits each dataset into chunk_size chunks
     """
-    # streaming = int(not 'novideo' in filename)
 
     # On uncleaned filenames:
     streaming_providers = [
