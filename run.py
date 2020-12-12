@@ -15,7 +15,7 @@ from src.models import train_model
 import logging
 import pickle
 
-logging.basicConfig(filename='model_events.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='model_events.log', level=logging.DEBUG)
 
 def main(targets):
 
