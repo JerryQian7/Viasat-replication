@@ -12,6 +12,8 @@ from src.data import preprocess_data
 from src.features import create_features
 from src.models import train_model
 
+import logging
+
 def main(targets):
 
     # Will change to test config path if test target is seen
@@ -85,7 +87,7 @@ def main(targets):
             generate_params = json.load(f)
 
         print('Collecting data with network-stats.')
-        get_data(generate_params)
+        collect_data(**generate_params)
         print('Data collection complete.')
 
     return

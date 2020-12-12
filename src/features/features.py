@@ -160,7 +160,7 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     results = pool.map(_engineer_features, args)
     print(f'Time elapsed: {round(time.time() - start)} seconds.')
     
-    features = np.vstack(filter(lambda x: x is not None, results))
+    features = np.vstack(list(filter(lambda x: x is not None, results)))
 
     features_df = pd.DataFrame(features, columns=cols).dropna()
     print(f'{features_df.shape[0]} chunks of data feature engineered.')

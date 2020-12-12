@@ -1,14 +1,15 @@
 {
-    "source_dir": "data/test/features/processed_features.csv",
+    "source": "data/test/features/features.csv",
+    "validation_size": 0.3,
     "classifier": "RandomForest",
     "model_params": {
         "RandomForest": {
-            "bootstrap": 1,
-            "max_depth": 80,
-            "max_features": 3,
-            "min_samples_leaf": 3,
-            "min_samples_split": 10,
-            "n_estimators": 300
+            "bootstrap": true,
+            "max_depth": null,
+            "max_features": "auto",
+            "min_samples_leaf": 1,
+            "min_samples_split": 2,
+            "n_estimators": 100
         },
 
         "KNN": {

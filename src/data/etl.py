@@ -9,7 +9,6 @@ import pathlib
 import multiprocessing
 import time
 
-DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/GoodData"
 DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/data/unzipped"
 # network-stats records per-packet timing in milliseconds,
 PACKET_TIMESTAMP_UNIT = 'ms'

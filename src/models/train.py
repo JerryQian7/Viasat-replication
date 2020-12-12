@@ -4,19 +4,20 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 
-def train_model(source_dir, classifier, model_params):
+def train_model(source, validation_size, classifier, model_params):
     """
     Trains model with data preparation and desired classifier.
     """
 
-    df = pd.read_csv(source_dir)
+    df = pd.read_csv(source)
     X = df.drop(columns=['streaming']).values
     y = df['streaming'].values
-    #Train test split of 70/30
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=validation_size)
 
     #Normalizing data with respect to the entire training data
     scaler = StandardScaler()
@@ -27,7 +28,8 @@ def train_model(source_dir, classifier, model_params):
     #Choosing the desired model type
     classifier_type = {
         "RandomForest": RandomForestClassifier,
-        "KNN": KNeighborsClassifier
+        "KNN": KNeighborsClassifier,
+        "LogisticRegression": LogisticRegression
     }
 
     model_params = model_params[classifier]

@@ -1,5 +1,6 @@
 {
-    "source_dir": "data/features/features.csv",
+    "source": "data/features/features.csv",
+    "validation_size": 0.3,
     "classifier": "RandomForest",
     "model_params": {
         "RandomForest": {
