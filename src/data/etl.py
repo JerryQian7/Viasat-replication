@@ -9,6 +9,8 @@ import pathlib
 import multiprocessing
 import time
 
+from src.utils import ensure_path_exists
+
 DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/data/unzipped"
 # network-stats records per-packet timing in milliseconds,
 PACKET_TIMESTAMP_UNIT = 'ms'
@@ -129,7 +131,7 @@ def preprocess_data(source_dir, out_dir):
 
         # Create the parents. It's important we don't make the final directory
         # otherwise the symlink will fail since it already exists!
-        source_path.parent.mkdir(parents=True, exist_ok=True)
+        ensure_path_exists(source_path.parent, is_dir=True)
 
         # Symlink data to make our source directory
         print(f"Symlinking {source_path} to raw data from {DATA_DIRECTORY}")
@@ -138,7 +140,7 @@ def preprocess_data(source_dir, out_dir):
         )
 
     # Ensure out directory exists.
-    out_path.mkdir(parents=True, exist_ok=True)
+    ensure_path_exists(out_path, is_dir=True)
         
     # Clean out existing preprocessed files.
     print(f"Removing existing files from `{out_path}`")

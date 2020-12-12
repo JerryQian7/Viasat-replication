@@ -45,8 +45,10 @@ Now, you are ready to configure targets for our project build. Details are speci
 ### Logging
 
 Logging behavior can be configured in `config/logging.json`.
-
-**TODO**
+| Key | Description |
+| --- | --- |
+| produce_logs | Boolean. Whether or not to write to the log file. Default: `true` |
+| log_file | Path to the log file. Default: `data/logs/project_run.log` |
 
 ### Target `generate`
 
@@ -103,9 +105,20 @@ See `config/train-params.json` for configuration:
 | Key | Description |
 | --- | --- |
 | source | Path to csv containing feature engineered data. Default: `data/features/features.csv` |
+| out | Path to .pkl file which will save the trained model. Default: `data/out/model.pkl` |
 | validation_size | Proportion. This amount of training data will be withheld to evaluate the performance of the trained classifier. Default: `0.3` |
 | classifier | String name of scikit-learn classifier to use. One of 'RandomForest', 'KNN', or 'LogisticRegression'. Default: `RandomForest` |
 | model_params | Scikit-Learn hyperparameters for the chosen model. See scikit-learn documentation. |
+
+### Target `all`
+
+Runs `data`, `features`, `train` in order.
+
+### Target `test`
+
+Runs `data`, `features`, `train` with configuration found in `test/config/`.
+
+Can optionally specify targets after test to only run that target. For example `python run.py test data` will only run the data target with the test config.
 
 ## Report
 

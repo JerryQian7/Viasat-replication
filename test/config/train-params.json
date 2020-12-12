@@ -1,5 +1,6 @@
 {
     "source": "data/test/features/features.csv",
+    "out": "data/test/out/model.pkl",
     "validation_size": 0.3,
     "classifier": "RandomForest",
     "model_params": {

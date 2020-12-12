@@ -15,6 +15,8 @@ from src.features.feature_creation import longest_dir_streak
 import multiprocessing
 import time
 
+from src.utils import ensure_path_exists
+
 def _engineer_features(args):
     return engineer_features(*args)
     
@@ -113,7 +115,8 @@ def engineer_features(
 def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1, rolling_window_2, resample_rate, frequency):
 
     # Ensure that the output directory exists.
-    os.makedirs(out_dir, exist_ok=True)
+    ensure_path_exists(source_dir, is_dir=True)
+    ensure_path_exists(out_dir, is_dir=True)
 
     #splitting dataframe into chunk_size'd chunks
     #chunk size is in milliseconds

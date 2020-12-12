@@ -8,7 +8,11 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import confusion_matrix
 
-def train_model(source, validation_size, classifier, model_params):
+import pickle
+
+from src.utils import ensure_path_exists
+
+def train_model(source, out, validation_size, classifier, model_params):
     """
     Trains model with data preparation and desired classifier.
     """
@@ -40,5 +44,9 @@ def train_model(source, validation_size, classifier, model_params):
     y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
     print('%s model accuracy: %s' % (classifier, accuracy))
+
+    ensure_path_exists(out)
+    with open(out, 'wb') as outfile:
+        pickle.dump(clf, outfile)
 
     return clf
