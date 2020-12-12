@@ -13,6 +13,9 @@ from src.features import create_features
 from src.models import train_model
 
 import logging
+import pickle
+
+logging.basicConfig(filename='model_events.log', encoding='utf-8', level=logging.DEBUG)
 
 def main(targets):
 
@@ -35,6 +38,7 @@ def main(targets):
         # Otherwise, if additional targets are specified then only run those
         # targets but still use test config (and therefore test data).
         print('Test target recognized. Will use test configuration files.')
+        logging.info('Test target recognized. Will use test configuration files.')
         config_dir = 'test/config'
 
         if len(targets) == 1:
@@ -45,50 +49,64 @@ def main(targets):
         # Load, clean, and preprocess data. Then store preprocessed data to
         # configured intermediate directory.
         print('Data target recognized.')
+        logging.info('Data target recognized.')
 
         with open(Path(config_dir, 'data-params.json'), 'r') as f:
             data_params = json.load(f)
 
         print('Running ETL pipeline.')
+        logging.info('Running ETL pipeline.')
         preprocess_data(**data_params)
         print('ETL pipeline complete.')
+        logging.info('ETL pipeline complete.')
 
     if 'features' in targets or run_all:
         # Creates features for preprocessed data and stores feature-engineered
         # data to a configured csv and directory.
         print('Features target recognized.')
+        logging.info('Features target recognized.')
 
         with open(Path(config_dir, 'features-params.json'), 'r') as f:
             features_params = json.load(f)
 
         print('Engineering features.')
+        logging.info('Engineering features.')
         create_features(**features_params)
         print('Feature engineering complete.')
+        logging.info('Feature engineering complete.')
          
     if 'train' in targets or run_all:
         # Trains model based on feature-engineeered data, report some of its
         # scores, and save the model.
         print('Train target recognized.')
+        logging.info('Train target recognized.')
 
         with open(Path(config_dir, 'train-params.json'), 'r') as f:
             train_params = json.load(f)
 
         print('Training model.')
-        train_model(**train_params)
+        logging.info('Training model.')
+        model = train_model(**train_params)
+        filename = 'trained_model.sav'
+        pickle.dump(model, open(filename, 'wb'))
         print('Model training complete.')
+        logging.info('Model training complete.')
 
     if 'generate' in targets:
         # Generates data from network-stats
         #
         # NOTE: This target should *not* be included in `all`.
         print('Generate target recognized.')
+        logging.info('Generate target recognized.')
 
         with open(Path(config_dir, 'generate-params.json'), 'r') as f:
             generate_params = json.load(f)
 
         print('Collecting data with network-stats.')
+        logging.info('Collecting data with network-stats.')
         collect_data(**generate_params)
         print('Data collection complete.')
+        logging.info('Data collection complete.')
 
     return
 
