@@ -10,6 +10,8 @@ from sklearn.metrics import confusion_matrix
 
 import pickle
 
+import logging
+
 from src.utils import ensure_path_exists
 
 def train_model(source, out, validation_size, classifier, model_params):
@@ -43,10 +45,12 @@ def train_model(source, out, validation_size, classifier, model_params):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print('%s model accuracy: %s' % (classifier, accuracy))
+    # print('%s model accuracy: %s' % (classifier, accuracy))
+    logging.info('%s model accuracy: %s' % (classifier, accuracy))
 
     ensure_path_exists(out)
     with open(out, 'wb') as outfile:
         pickle.dump(clf, outfile)
+    logging.info(f'Model saved to {out}')
 
     return clf

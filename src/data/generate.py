@@ -2,6 +2,7 @@ import datetime
 import os
 import sys
 import warnings
+import logging
 
 from src.utils import ensure_path_exists
 
@@ -13,7 +14,7 @@ def collect_data(
     Captures data from network_stats
     """
 
-    print(
+    logging.info(
         'This functionality is moving to an entirely new repository, and its '
         'development in this repository has ceased being supported.',
     )

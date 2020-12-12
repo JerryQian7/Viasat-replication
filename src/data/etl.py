@@ -9,6 +9,8 @@ import pathlib
 import multiprocessing
 import time
 
+import logging
+
 from src.utils import ensure_path_exists
 
 DATA_DIRECTORY = "/teams/DSC180A_FA20_A00/b05vpnxray/data/unzipped"
@@ -87,7 +89,8 @@ def _process_file(args):
     try:
         return process_file(*args)
     except Exception as e:
-        print(args)
+        # print(args)
+        logging.info(args)
         raise e
 
 def process_file(filepath, out_dir):
@@ -96,6 +99,7 @@ def process_file(filepath, out_dir):
     """
     
     # print(f'Processing {filepath}')
+    # logging.info(f'Processing {filepath}')
 
     df = pd.read_csv(filepath)
     
@@ -134,7 +138,8 @@ def preprocess_data(source_dir, out_dir):
         ensure_path_exists(source_path.parent, is_dir=True)
 
         # Symlink data to make our source directory
-        print(f"Symlinking {source_path} to raw data from {DATA_DIRECTORY}")
+        # print(f"Symlinking {source_path} to raw data from {DATA_DIRECTORY}")
+        logging.info(f"Symlinking {source_path} to raw data from {DATA_DIRECTORY}")
         source_path.symlink_to(
             pathlib.Path(DATA_DIRECTORY), target_is_directory=True
         )
@@ -143,7 +148,8 @@ def preprocess_data(source_dir, out_dir):
     ensure_path_exists(out_path, is_dir=True)
         
     # Clean out existing preprocessed files.
-    print(f"Removing existing files from `{out_path}`")
+    # print(f"Removing existing files from `{out_path}`")
+    logging.info(f"Removing existing files from `{out_path}`")
     for fp in out_path.iterdir():
         fp.unlink()
     
@@ -163,13 +169,17 @@ def preprocess_data(source_dir, out_dir):
     ]
 
     workers = multiprocessing.cpu_count()
-    print(f'Starting a processing pool of {workers} workers.')
+    # print(f'Starting a processing pool of {workers} workers.')
+    logging.info(f'Starting a processing pool of {workers} workers.')
     start = time.time()
     pool = multiprocessing.Pool(processes=workers)
     results = pool.map(_process_file, args)
-    print(f'Time elapsed: {round(time.time() - start)} seconds.')
+    # print(f'Time elapsed: {round(time.time() - start)} seconds.')
+    logging.info(f'Time elapsed: {round(time.time() - start)} seconds.')
     
     results = np.array(list(results))
-    print(f'{sum(results)} input files successfully preprocessed.')
-    print(f"{sum(~results)} files couldn't be procesed.")
+    # print(f'{sum(results)} input files successfully preprocessed.')
+    logging.info(f'{sum(results)} input files successfully preprocessed.')
+    # print(f"{sum(~results)} files couldn't be procesed.")
+    logging.info(f"{sum(~results)} files couldn't be procesed.")
         

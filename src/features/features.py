@@ -15,6 +15,8 @@ from src.features.feature_creation import longest_dir_streak
 import multiprocessing
 import time
 
+import logging
+
 from src.utils import ensure_path_exists
 
 def _engineer_features(args):
@@ -157,16 +159,20 @@ def create_features(source_dir, out_dir, out_file, chunk_size, rolling_window_1,
     ]
 
     workers = multiprocessing.cpu_count()
-    print(f'Starting a processing pool of {workers} workers.')
+    # print(f'Starting a processing pool of {workers} workers.')
+    logging.info(f'Starting a processing pool of {workers} workers.')
     start = time.time()
     pool = multiprocessing.Pool(processes=workers)
     results = pool.map(_engineer_features, args)
-    print(f'Time elapsed: {round(time.time() - start)} seconds.')
+    # print(f'Time elapsed: {round(time.time() - start)} seconds.')
+    logging.info(f'Time elapsed: {round(time.time() - start)} seconds.')
     
     features = np.vstack(list(filter(lambda x: x is not None, results)))
 
     features_df = pd.DataFrame(features, columns=cols).dropna()
-    print(f'{features_df.shape[0]} chunks of data feature engineered.')
+    # print(f'{features_df.shape[0]} chunks of data feature engineered.')
+    logging.info(f'{features_df.shape[0]} chunks of data feature engineered.')
 
     features_df.to_csv(os.path.join(out_dir, out_file), index=False)
-    print('Features created: ', list(features_df.columns))
+    # print('Features created: ', list(features_df.columns))
+    logging.info(f'Features created: {list(features_df.columns)}')
